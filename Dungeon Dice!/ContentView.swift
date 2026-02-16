@@ -4,6 +4,8 @@ struct ContentView: View {
     
     @State private var diceNum: Int = 1
     @State private var message = "Roll a die!"
+    @State private var animationTrigger = false //change when animation should occur
+    @State private var isDoneAnimating = true
     
     enum Dice: Int, CaseIterable, Identifiable {
         case four = 4
@@ -33,6 +35,13 @@ struct ContentView: View {
             Text(message)
                 .font(.largeTitle)
                 .multilineTextAlignment(.center)
+                .rotation3DEffect(isDoneAnimating ? .degrees(360) : .degrees(0), axis: (1, 0, 0))
+                .onChange(of: animationTrigger) {
+                    isDoneAnimating = false // set to the beginning false
+                    withAnimation(.interpolatingSpring(duration: 0.6, bounce: 0.4)) {
+                        isDoneAnimating = true
+                    }
+                }
                 //WUSSTE NICHT WIE MAN CENTER
                 
             
@@ -41,6 +50,7 @@ struct ContentView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))]){
                 ForEach(Dice.allCases) { die in
                     Button("\(die.rawValue)-sided") {
+                        animationTrigger.toggle()
                         message = ("You rolled a \(die.roll) on a \(die)-sided die.")
                         }
                         .buttonStyle(.glassProminent)

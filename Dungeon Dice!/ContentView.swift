@@ -6,15 +6,17 @@ struct ContentView: View {
     @State private var message = "Roll a die!"
     @State private var animationTrigger = false //change when animation should occur
     @State private var isDoneAnimating = true
+    @State private var rolls: [Int] = [] //Empty
+    private var grandTotal: Int { rolls.reduce(0, +)}
     
     enum Dice: Int, CaseIterable, Identifiable {
-        case four = 4
-        case six = 6
-        case eight = 8
-        case ten = 10
-        case twelve = 12
-        case twenty = 20
-        case hundred = 100
+        case d4 = 4
+        case d6 = 6
+        case d8 = 8
+        case d10 = 10
+        case d12 = 12
+        case d20 = 20
+        case d100 = 100
         
         var id: Int {
             self.rawValue
@@ -31,9 +33,42 @@ struct ContentView: View {
                 .fontWeight(.black)
                 .foregroundStyle(.red) //WUSSTE ICH NICHT
             
+            GroupBox {
+                ForEach(rolls, id: \.self) { roll in
+                    Text("\(roll)")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Divider()
+                }
+                
+                
+                HStack{
+                    Text("TOTAL: \(rolls.reduce(0, +))")
+                        .font(.title2)
+                        .bold()
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                        .animation(.default, value: grandTotal)
+                    Spacer()
+                    Button("Clear") {
+                        rolls.removeAll()
+                    }
+                            .buttonStyle(.glass)
+                            .tint(.red)
+                            .disabled(rolls.isEmpty)
+                }
+                
+            } label: {
+                Text("Session Rolls:")
+                    .font(.title2)
+                    .bold()
+            }
+
+            
             Spacer()
+            
             Text(message)
-                .font(.largeTitle)
+                .font(.title)
                 .multilineTextAlignment(.center)
                 .rotation3DEffect(isDoneAnimating ? .degrees(360) : .degrees(0), axis: (1, 0, 0))
                 .onChange(of: animationTrigger) {
@@ -51,7 +86,9 @@ struct ContentView: View {
                 ForEach(Dice.allCases) { die in
                     Button("\(die.rawValue)-sided") {
                         animationTrigger.toggle()
-                        message = ("You rolled a \(die.roll) on a \(die)-sided die.")
+                        let roll = die.roll
+                        message = ("You rolled a \(die.roll) on a \(die)")
+                        rolls.append(roll)
                         }
                         .buttonStyle(.glassProminent)
                         .tint(.red) // WUSSTE NICHT WIE ICH DEN HINTERGRUND VOM BUTTON EINSTELLE

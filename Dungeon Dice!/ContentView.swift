@@ -4,7 +4,23 @@ struct ContentView: View {
     
     @State private var diceNum: Int = 1
     @State private var message = "Roll a die!"
-    private let diceTypes = [4, 6, 8, 10, 12, 20, 100]
+    
+    enum Dice: Int, CaseIterable, Identifiable {
+        case four = 4
+        case six = 6
+        case eight = 8
+        case ten = 10
+        case twelve = 12
+        case twenty = 20
+        case hundred = 100
+        
+        var id: Int {
+            self.rawValue
+        }
+        var roll: Int {
+            return Int.random(in: 1...self.rawValue)
+        }
+    }
     
     var body: some View {
         VStack {
@@ -23,9 +39,9 @@ struct ContentView: View {
             Spacer()
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))]){
-                    ForEach(diceTypes, id: \.self) { diceType in
-                        Button("\(diceType)-sided") {
-                            rollDie(sides: diceType)
+                ForEach(Dice.allCases) { die in
+                    Button("\(die.rawValue)-sided") {
+                        message = ("You rolled a \(die.roll) on a \(die)-sided die.")
                         }
                         .buttonStyle(.glassProminent)
                         .tint(.red) // WUSSTE NICHT WIE ICH DEN HINTERGRUND VOM BUTTON EINSTELLE
@@ -37,11 +53,6 @@ struct ContentView: View {
                 }
         }
         .padding()
-    }
-    
-    func rollDie(sides: Int) {
-        diceNum = Int.random(in: 1...sides)
-        message = ("You rolled a \(diceNum) on a \(sides)-sided die.")
     }
 }
 
